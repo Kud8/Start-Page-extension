@@ -1,0 +1,17 @@
+{
+  "extension_name": {
+    "message": "Амиго.Поиск"
+  },
+
+  "extension_description": {
+    "message": "Приложение для удобного поиска"
+  },
+
+  "app_name": {
+    "message": "Амиго.Поиск"
+  },
+
+  "app_description": {
+    "message": "Приложение для удобного поиска"
+  }
+}

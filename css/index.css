@@ -1,0 +1,9 @@
+.container {
+    margin-top: 8%;
+}
+
+h3 {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 100%;
+}

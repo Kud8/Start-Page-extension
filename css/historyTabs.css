@@ -1,0 +1,52 @@
+.tab a {
+    text-decoration: none;
+    color: #359CC6;
+    margin: 0 10px;
+}
+
+.tab a:hover {
+    color: #E88F00;
+    border-bottom: 1px dotted #9F1D35;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.tab {
+    display: inline-block;
+    background: #fff;
+    padding: 1em;
+    margin: 0 1% 1%;
+    width: 23%;
+    height: 65%;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-shadow: 2px 2px 4px 0 #ccc;
+}
+
+.tabs {
+    width: 80%;
+    margin: 1.5em 0;
+    padding: 0;
+    font-size: .85em;
+}
+
+.tabs_container {
+    display: flex;
+    justify-content: center;
+}
+
+.tab_favicon {
+    display: flex;
+    justify-content: center;
+}
+
+.tab_name {
+    display: flex;
+    justify-content: center;
+    margin-top: 17%;
+}

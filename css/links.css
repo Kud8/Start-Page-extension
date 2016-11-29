@@ -1,0 +1,16 @@
+.links_container {
+    margin-top: 10%;
+    display: flex;
+    justify-content: center;
+}
+
+.links {
+    width: 50%;
+    display: flex;
+    justify-content: space-around;
+}
+
+.links_history, .links_bookmarks, .links_downloads {
+    display: inline-block;
+    cursor: pointer;
+}
