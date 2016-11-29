@@ -22064,9 +22064,10 @@
 	    _createClass(Search, [{
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
-	            var searchText = document.getElementById('search_input').value;
-	            console.log(searchText);
+	
 	            document.getElementById('search_form').addEventListener('submit', function () {
+	                var searchText = document.getElementById('search_input').value;
+	                console.log(searchText);
 	                chrome.tabs.create({
 	                    'url': 'https://www.google.ru/search?q=' + searchText
 	                });

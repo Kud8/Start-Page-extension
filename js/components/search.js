@@ -5,9 +5,10 @@ import React from 'react';
 export default class Search extends React.Component {
 
     componentDidMount() {
-        var searchText = document.getElementById('search_input').value;
-        console.log(searchText);
+
         document.getElementById('search_form').addEventListener('submit', () => {
+            var searchText = document.getElementById('search_input').value;
+            console.log(searchText);
             chrome.tabs.create({
                 'url': 'https://www.google.ru/search?q=' + searchText
             });
