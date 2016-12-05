@@ -1,90 +1,79 @@
-'use strict';
-
 import React from 'react';
 
 var dragSrcEl = null;
 
-function handleDragStart(e) {
-    this.style.opacity = '0.4';
-    dragSrcEl = this;
-
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', this.innerHTML);
-}
-
-function handleDragOver(e) {
-    if (e.preventDefault) {
-        e.preventDefault();
-    }
-    e.dataTransfer.dropEffect = 'move';
-    this.classList.add('over');
-    return false;
-}
-
-function handleDragLeave(e) {
-    this.classList.remove('over');
-}
-
-function handleDrop(e) {
-    if (e.stopPropagation) {
-        e.stopPropagation();
-    }
-    dragSrcEl.style.opacity = '1';
-    if (dragSrcEl != this) {
-        var from = dragSrcEl.firstChild.firstChild.getAttribute('href');
-        var to = this.firstChild.firstChild.getAttribute('href');
-        var from_id = -1, to_id = -1;
-        dragSrcEl.innerHTML = this.innerHTML;
-
-        chrome.storage.local.get('history', function(result) {
-            let history = result['history'];
-            //console.log('After get: ', history);
-            for (let i = 0; i < history.length; ++i) {
-                if (history[i][0] == from) {
-                    from_id = i;
-                }
-                if (history[i][0] == to) {
-                    to_id = i;
-                }
-            }
-            console.log(from_id, to_id);
-            let tmp = history[from_id];
-            history[from_id] = history[to_id];
-            history[to_id] = tmp;
-            //console.log('Before set: ', history);
-            chrome.storage.local.set({'history': history});
-        });
-        //console.log('From: ' + from + '\nTo: ' + to);
-        this.innerHTML = e.dataTransfer.getData('text/html');
-    }
-    return false;
-}
-
-function handleDragEnd(e) {
-    var tabs = document.getElementsByClassName('tab');
-    [].forEach.call(tabs, function (tab) {
-        tab.classList.remove('over');
-    });
-}
-
 export default class Tab extends React.Component {
 
-    componentDidMount() {
+    handleDragStart(e) {
+        let self = e.currentTarget;
+        self.style.opacity = '0.4';
+        dragSrcEl = self;
+
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', self.innerHTML);
+    }
+
+    handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        let self = e.currentTarget;
+        self.classList.add('over');
+        return false;
+    }
+
+    handleDragLeave(e) {
+        let self = e.currentTarget;
+        self.classList.remove('over');
+    }
+
+    handleDrop(e) {
+        e.stopPropagation();
+        let self = e.currentTarget;
+        dragSrcEl.style.opacity = '1';
+        if (dragSrcEl != self) {
+            var from = dragSrcEl.firstChild.firstChild.getAttribute('href');
+            var to = self.firstChild.firstChild.getAttribute('href');
+            var from_id = -1, to_id = -1;
+            dragSrcEl.innerHTML = self.innerHTML;
+
+            chrome.storage.local.get('history', function(result) {
+                let history = result['history'];
+                for (let i = 0; i < history.length; ++i) {
+                    if (history[i].url == from) {
+                        from_id = i;
+                    }
+                    if (history[i].url == to) {
+                        to_id = i;
+                    }
+                }
+                console.log(from_id, to_id);
+                let tmp = history[from_id];
+                history[from_id] = history[to_id];
+                history[to_id] = tmp;
+                chrome.storage.local.set({'history': history});
+            });
+            self.innerHTML = e.dataTransfer.getData('text/html');
+        }
+        return false;
+    }
+
+    handleDragEnd(e) {
         var tabs = document.getElementsByClassName('tab');
-        [].forEach.call(tabs, function(tab) {
-            tab.addEventListener('dragstart', handleDragStart, false);
-            tab.addEventListener('dragover', handleDragOver, false);
-            tab.addEventListener('dragleave', handleDragLeave, false);
-            tab.addEventListener('drop', handleDrop, false);
-            tab.addEventListener('dragend', handleDragEnd, false);
+        [].forEach.call(tabs, function (tab) {
+            tab.classList.remove('over');
         });
     }
 
     render() {
-        var href = this.props.data[0];
+        var href = this.props.data.url;
 
         return (
-            <div className="tab" draggable="true">
+            <div className="tab" draggable="true"
+                                     onDragStart={this.handleDragStart}
+                                     onDragOver={this.handleDragOver}
+                                     onDragLeave={this.handleDragLeave}
+                                     onDrop={this.handleDrop}
+                                     onDragEnd={this.handleDragEnd}>
                 <div className="tab_favicon">
                     <a href={href}>
                         <img src={'https://www.google.com/s2/favicons?domain=' + href}/>

@@ -1,5 +1,3 @@
-'use strict';
-
 import React from 'react';
 import Tab from './Tab';
 
@@ -14,10 +12,10 @@ function buildTypedUrlList() {
         },
         function(historyItems) {
             for (var i = 0; i < historyItems.length; ++i) {
-                urlArray.push([historyItems[i].url, historyItems[i].visitCount]);
+                urlArray.push( {url: historyItems[i].url, visitCount: historyItems[i].visitCount});
             }
             urlArray.sort(function(a, b) {
-                return b[1] - a[1];
+                return b.visitCount - a.visitCount;
             });
             console.log(urlArray.slice(0, 8));
         });
@@ -47,10 +45,10 @@ export default class Tabs extends React.Component {
                     function (historyItems) {
                         console.log('I am in search!');
                         for (var i = 0; i < historyItems.length; ++i) {
-                            urlArray.push([historyItems[i].url, historyItems[i].visitCount]);
+                            urlArray.push({url: historyItems[i].url, visitCount: historyItems[i].visitCount});
                         }
                         urlArray.sort(function (a, b) {
-                            return b[1] - a[1];
+                            return b.visitCount - a.visitCount;
                         });
                         chrome.storage.local.set({'history': urlArray.slice(0, 8)});
                         this.setState({history: urlArray.slice(0, 8)});
@@ -85,7 +83,7 @@ export default class Tabs extends React.Component {
         if (data.length < countOfTabs) {
             console.log('length < 8');
             for (var i = data.length; i < countOfTabs; ++i) {
-                data[i] = [''];
+                data[i] = {url : ''};
             }
         }
         if (data.length > countOfTabs) {

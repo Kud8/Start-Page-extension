@@ -65,11 +65,11 @@
 	
 	var _historyTabs2 = _interopRequireDefault(_historyTabs);
 	
-	var _links = __webpack_require__(185);
+	var _links = __webpack_require__(186);
 	
 	var _links2 = _interopRequireDefault(_links);
 	
-	var _search = __webpack_require__(186);
+	var _search = __webpack_require__(187);
 	
 	var _search2 = _interopRequireDefault(_search);
 	
@@ -21792,7 +21792,7 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _Tab = __webpack_require__(187);
+	var _Tab = __webpack_require__(185);
 	
 	var _Tab2 = _interopRequireDefault(_Tab);
 	
@@ -21814,10 +21814,10 @@
 	        'startTime': oneMonthAgo
 	    }, function (historyItems) {
 	        for (var i = 0; i < historyItems.length; ++i) {
-	            urlArray.push([historyItems[i].url, historyItems[i].visitCount]);
+	            urlArray.push({ url: historyItems[i].url, visitCount: historyItems[i].visitCount });
 	        }
 	        urlArray.sort(function (a, b) {
-	            return b[1] - a[1];
+	            return b.visitCount - a.visitCount;
 	        });
 	        console.log(urlArray.slice(0, 8));
 	    });
@@ -21853,10 +21853,10 @@
 	                    }, function (historyItems) {
 	                        console.log('I am in search!');
 	                        for (var i = 0; i < historyItems.length; ++i) {
-	                            urlArray.push([historyItems[i].url, historyItems[i].visitCount]);
+	                            urlArray.push({ url: historyItems[i].url, visitCount: historyItems[i].visitCount });
 	                        }
 	                        urlArray.sort(function (a, b) {
-	                            return b[1] - a[1];
+	                            return b.visitCount - a.visitCount;
 	                        });
 	                        chrome.storage.local.set({ 'history': urlArray.slice(0, 8) });
 	                        this.setState({ history: urlArray.slice(0, 8) });
@@ -21888,7 +21888,7 @@
 	            if (data.length < countOfTabs) {
 	                console.log('length < 8');
 	                for (var i = data.length; i < countOfTabs; ++i) {
-	                    data[i] = [''];
+	                    data[i] = { url: '' };
 	                }
 	            }
 	            if (data.length > countOfTabs) {
@@ -21918,6 +21918,152 @@
 
 /***/ },
 /* 185 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(2);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var dragSrcEl = null;
+	
+	var Tab = function (_React$Component) {
+	    _inherits(Tab, _React$Component);
+	
+	    function Tab() {
+	        _classCallCheck(this, Tab);
+	
+	        return _possibleConstructorReturn(this, (Tab.__proto__ || Object.getPrototypeOf(Tab)).apply(this, arguments));
+	    }
+	
+	    _createClass(Tab, [{
+	        key: 'handleDragStart',
+	        value: function handleDragStart(e) {
+	            var self = e.currentTarget;
+	            self.style.opacity = '0.4';
+	            dragSrcEl = self;
+	
+	            e.dataTransfer.effectAllowed = 'move';
+	            e.dataTransfer.setData('text/html', self.innerHTML);
+	        }
+	    }, {
+	        key: 'handleDragOver',
+	        value: function handleDragOver(e) {
+	            e.preventDefault();
+	            e.dataTransfer.dropEffect = 'move';
+	            var self = e.currentTarget;
+	            self.classList.add('over');
+	            return false;
+	        }
+	    }, {
+	        key: 'handleDragLeave',
+	        value: function handleDragLeave(e) {
+	            var self = e.currentTarget;
+	            self.classList.remove('over');
+	        }
+	    }, {
+	        key: 'handleDrop',
+	        value: function handleDrop(e) {
+	            e.stopPropagation();
+	            var self = e.currentTarget;
+	            dragSrcEl.style.opacity = '1';
+	            if (dragSrcEl != self) {
+	                var from = dragSrcEl.firstChild.firstChild.getAttribute('href');
+	                var to = self.firstChild.firstChild.getAttribute('href');
+	                var from_id = -1,
+	                    to_id = -1;
+	                dragSrcEl.innerHTML = self.innerHTML;
+	
+	                chrome.storage.local.get('history', function (result) {
+	                    var history = result['history'];
+	                    for (var i = 0; i < history.length; ++i) {
+	                        if (history[i].url == from) {
+	                            from_id = i;
+	                        }
+	                        if (history[i].url == to) {
+	                            to_id = i;
+	                        }
+	                    }
+	                    console.log(from_id, to_id);
+	                    var tmp = history[from_id];
+	                    history[from_id] = history[to_id];
+	                    history[to_id] = tmp;
+	                    chrome.storage.local.set({ 'history': history });
+	                });
+	                self.innerHTML = e.dataTransfer.getData('text/html');
+	            }
+	            return false;
+	        }
+	    }, {
+	        key: 'handleDragEnd',
+	        value: function handleDragEnd(e) {
+	            var tabs = document.getElementsByClassName('tab');
+	            [].forEach.call(tabs, function (tab) {
+	                tab.classList.remove('over');
+	            });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            var href = this.props.data.url;
+	
+	            return _react2.default.createElement(
+	                'div',
+	                { className: 'tab', draggable: 'true',
+	                    onDragStart: this.handleDragStart,
+	                    onDragOver: this.handleDragOver,
+	                    onDragLeave: this.handleDragLeave,
+	                    onDrop: this.handleDrop,
+	                    onDragEnd: this.handleDragEnd },
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'tab_favicon' },
+	                    _react2.default.createElement(
+	                        'a',
+	                        { href: href },
+	                        _react2.default.createElement('img', { src: 'https://www.google.com/s2/favicons?domain=' + href })
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'tab_name' },
+	                    _react2.default.createElement(
+	                        'a',
+	                        { href: href },
+	                        _react2.default.createElement(
+	                            'h3',
+	                            null,
+	                            href
+	                        )
+	                    )
+	                )
+	            );
+	        }
+	    }]);
+	
+	    return Tab;
+	}(_react2.default.Component);
+	
+	exports.default = Tab;
+	;
+
+/***/ },
+/* 186 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22011,10 +22157,10 @@
 	exports.default = Links;
 
 /***/ },
-/* 186 */
+/* 187 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 	
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
@@ -22029,167 +22175,16 @@
 	
 	function Search() {
 	    return _react2.default.createElement(
-	        'div',
-	        { className: 'search_container' },
+	        "div",
+	        { className: "search_container" },
 	        _react2.default.createElement(
-	            'form',
-	            { action: 'https://www.google.ru/search', method: 'get', id: 'search_form' },
-	            _react2.default.createElement('input', { type: 'search', name: 'q', placeholder: '\u043F\u043E\u0438\u0441\u043A', id: 'search_input' }),
-	            _react2.default.createElement('input', { type: 'submit', name: '', value: '', id: 'search_submit' })
+	            "form",
+	            { action: "https://www.google.ru/search", method: "get", id: "search_form" },
+	            _react2.default.createElement("input", { type: "search", name: "q", placeholder: "\u043F\u043E\u0438\u0441\u043A", id: "search_input" }),
+	            _react2.default.createElement("input", { type: "submit", name: "", value: "", id: "search_submit" })
 	        )
 	    );
 	}
-
-/***/ },
-/* 187 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _react = __webpack_require__(2);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var dragSrcEl = null;
-	
-	function handleDragStart(e) {
-	    this.style.opacity = '0.4';
-	    dragSrcEl = this;
-	
-	    e.dataTransfer.effectAllowed = 'move';
-	    e.dataTransfer.setData('text/html', this.innerHTML);
-	}
-	
-	function handleDragOver(e) {
-	    if (e.preventDefault) {
-	        e.preventDefault();
-	    }
-	    e.dataTransfer.dropEffect = 'move';
-	    this.classList.add('over');
-	    return false;
-	}
-	
-	function handleDragLeave(e) {
-	    this.classList.remove('over');
-	}
-	
-	function handleDrop(e) {
-	    if (e.stopPropagation) {
-	        e.stopPropagation();
-	    }
-	    dragSrcEl.style.opacity = '1';
-	    if (dragSrcEl != this) {
-	        var from = dragSrcEl.firstChild.firstChild.getAttribute('href');
-	        var to = this.firstChild.firstChild.getAttribute('href');
-	        var from_id = -1,
-	            to_id = -1;
-	        dragSrcEl.innerHTML = this.innerHTML;
-	
-	        chrome.storage.local.get('history', function (result) {
-	            var history = result['history'];
-	            //console.log('After get: ', history);
-	            for (var i = 0; i < history.length; ++i) {
-	                if (history[i][0] == from) {
-	                    from_id = i;
-	                }
-	                if (history[i][0] == to) {
-	                    to_id = i;
-	                }
-	            }
-	            console.log(from_id, to_id);
-	            var tmp = history[from_id];
-	            history[from_id] = history[to_id];
-	            history[to_id] = tmp;
-	            //console.log('Before set: ', history);
-	            chrome.storage.local.set({ 'history': history });
-	        });
-	        //console.log('From: ' + from + '\nTo: ' + to);
-	        this.innerHTML = e.dataTransfer.getData('text/html');
-	    }
-	    return false;
-	}
-	
-	function handleDragEnd(e) {
-	    var tabs = document.getElementsByClassName('tab');
-	    [].forEach.call(tabs, function (tab) {
-	        tab.classList.remove('over');
-	    });
-	}
-	
-	var Tab = function (_React$Component) {
-	    _inherits(Tab, _React$Component);
-	
-	    function Tab() {
-	        _classCallCheck(this, Tab);
-	
-	        return _possibleConstructorReturn(this, (Tab.__proto__ || Object.getPrototypeOf(Tab)).apply(this, arguments));
-	    }
-	
-	    _createClass(Tab, [{
-	        key: 'componentDidMount',
-	        value: function componentDidMount() {
-	            var tabs = document.getElementsByClassName('tab');
-	            [].forEach.call(tabs, function (tab) {
-	                tab.addEventListener('dragstart', handleDragStart, false);
-	                tab.addEventListener('dragover', handleDragOver, false);
-	                tab.addEventListener('dragleave', handleDragLeave, false);
-	                tab.addEventListener('drop', handleDrop, false);
-	                tab.addEventListener('dragend', handleDragEnd, false);
-	            });
-	        }
-	    }, {
-	        key: 'render',
-	        value: function render() {
-	            var href = this.props.data[0];
-	
-	            return _react2.default.createElement(
-	                'div',
-	                { className: 'tab', draggable: 'true' },
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'tab_favicon' },
-	                    _react2.default.createElement(
-	                        'a',
-	                        { href: href },
-	                        _react2.default.createElement('img', { src: 'https://www.google.com/s2/favicons?domain=' + href })
-	                    )
-	                ),
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'tab_name' },
-	                    _react2.default.createElement(
-	                        'a',
-	                        { href: href },
-	                        _react2.default.createElement(
-	                            'h3',
-	                            null,
-	                            href
-	                        )
-	                    )
-	                )
-	            );
-	        }
-	    }]);
-	
-	    return Tab;
-	}(_react2.default.Component);
-	
-	exports.default = Tab;
-	;
 
 /***/ }
 /******/ ]);
