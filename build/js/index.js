@@ -65,11 +65,11 @@
 	
 	var _historyTabs2 = _interopRequireDefault(_historyTabs);
 	
-	var _links = __webpack_require__(186);
+	var _links = __webpack_require__(185);
 	
 	var _links2 = _interopRequireDefault(_links);
 	
-	var _search = __webpack_require__(187);
+	var _search = __webpack_require__(186);
 	
 	var _search2 = _interopRequireDefault(_search);
 	
@@ -21792,7 +21792,7 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
-	var _Tab = __webpack_require__(185);
+	var _Tab = __webpack_require__(187);
 	
 	var _Tab2 = _interopRequireDefault(_Tab);
 	
@@ -21823,8 +21823,6 @@
 	    });
 	}
 	
-	//var event = new Event('historySorted');
-	
 	var Tabs = function (_React$Component) {
 	    _inherits(Tabs, _React$Component);
 	
@@ -21834,7 +21832,7 @@
 	        var _this = _possibleConstructorReturn(this, (Tabs.__proto__ || Object.getPrototypeOf(Tabs)).call(this, props));
 	
 	        _this.state = {
-	            history: [["google.com", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"], ["vk.com", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"], ["google.ru", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"], ["mail.ru", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"], ["google.com", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"], ["openedu.ru", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"], ["google.com", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"], ["vk.com", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"]]
+	            history: []
 	        };
 	        return _this;
 	    }
@@ -21846,42 +21844,69 @@
 	            var oneMonthAgo = new Date().getTime() - microsecondsPerMonth;
 	            var urlArray = [];
 	            var self = this;
-	            chrome.history.search({
-	                'text': '',
-	                'startTime': oneMonthAgo
-	            }, function (historyItems) {
-	                for (var i = 0; i < historyItems.length; ++i) {
-	                    urlArray.push([historyItems[i].url, historyItems[i].visitCount]);
+	            //chrome.storage.local.clear();
+	            chrome.storage.local.get('history', function (result) {
+	                if (result['history'] == undefined) {
+	                    chrome.history.search({
+	                        'text': '',
+	                        'startTime': oneMonthAgo
+	                    }, function (historyItems) {
+	                        console.log('I am in search!');
+	                        for (var i = 0; i < historyItems.length; ++i) {
+	                            urlArray.push([historyItems[i].url, historyItems[i].visitCount]);
+	                        }
+	                        urlArray.sort(function (a, b) {
+	                            return b[1] - a[1];
+	                        });
+	                        chrome.storage.local.set({ 'history': urlArray.slice(0, 8) });
+	                        this.setState({ history: urlArray.slice(0, 8) });
+	                    }.bind(this));
+	                    return;
+	                } else {
+	                    console.log('There are history in the storage');
+	                    this.setState({ history: result['history'] });
 	                }
-	                urlArray.sort(function (a, b) {
-	                    return b[1] - a[1];
-	                });
-	                self.setState({ history: urlArray.slice(0, 8) });
-	                //root.dispatchEvent(event);
+	            }.bind(this));
+	        }
+	    }, {
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            chrome.storage.onChanged.addListener(function (changes, namespace) {
+	                this.render();
+	                for (var k in changes) {
+	                    var storageChange = changes[k];
+	                    console.log('Storage key "%s" in namespace "%s" changed. ' + 'Old value was "%s", new value is "%s".', k, namespace, storageChange.oldValue, storageChange.newValue);
+	                }
 	            }.bind(this));
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            //root.addEventListener('historySorted', function(e) {
+	            var countOfTabs = 8;
+	            var data = this.state.history;
+	            console.log(data);
+	            if (data.length < countOfTabs) {
+	                console.log('length < 8');
+	                for (var i = data.length; i < countOfTabs; ++i) {
+	                    data[i] = [''];
+	                }
+	            }
+	            if (data.length > countOfTabs) {
+	                data = data.slice(0, countOfTabs);
+	            }
+	            var tabsTemplate = data.map(function (item, index) {
+	                return _react2.default.createElement(_Tab2.default, { data: item, key: index });
+	            });
+	
 	            return _react2.default.createElement(
 	                'div',
 	                { className: 'tabs_container' },
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'tabs' },
-	                    _react2.default.createElement(_Tab2.default, { data: this.state.history[0] }),
-	                    _react2.default.createElement(_Tab2.default, { data: this.state.history[1] }),
-	                    _react2.default.createElement(_Tab2.default, { data: this.state.history[2] }),
-	                    _react2.default.createElement(_Tab2.default, { data: this.state.history[3] }),
-	                    _react2.default.createElement(_Tab2.default, { data: this.state.history[4] }),
-	                    _react2.default.createElement(_Tab2.default, { data: this.state.history[5] }),
-	                    _react2.default.createElement(_Tab2.default, { data: this.state.history[6] }),
-	                    _react2.default.createElement(_Tab2.default, { data: this.state.history[7] })
+	                    tabsTemplate
 	                )
 	            );
-	            //}, false);
-	            //заменить на tabsTemplate с data.map
 	        }
 	    }]);
 	
@@ -21893,49 +21918,6 @@
 
 /***/ },
 /* 185 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.default = Tab;
-	
-	var _react = __webpack_require__(2);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function Tab(props) {
-	    var data = props.data; //text, favicon = this.props.data
-	    return _react2.default.createElement(
-	        'a',
-	        { href: data[0] },
-	        _react2.default.createElement(
-	            'div',
-	            { className: 'tab' },
-	            _react2.default.createElement(
-	                'div',
-	                { className: 'tab_favicon' },
-	                _react2.default.createElement('img', { src: data[1] })
-	            ),
-	            _react2.default.createElement(
-	                'div',
-	                { className: 'tab_name' },
-	                _react2.default.createElement(
-	                    'h3',
-	                    null,
-	                    data[0]
-	                )
-	            )
-	        )
-	    );
-	};
-
-/***/ },
-/* 186 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22029,6 +22011,36 @@
 	exports.default = Links;
 
 /***/ },
+/* 186 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = Search;
+	
+	var _react = __webpack_require__(2);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function Search() {
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'search_container' },
+	        _react2.default.createElement(
+	            'form',
+	            { action: 'https://www.google.ru/search', method: 'get', id: 'search_form' },
+	            _react2.default.createElement('input', { type: 'search', name: 'q', placeholder: '\u043F\u043E\u0438\u0441\u043A', id: 'search_input' }),
+	            _react2.default.createElement('input', { type: 'submit', name: '', value: '', id: 'search_submit' })
+	        )
+	    );
+	}
+
+/***/ },
 /* 187 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -22052,47 +22064,132 @@
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 	
-	var Search = function (_React$Component) {
-	    _inherits(Search, _React$Component);
+	var dragSrcEl = null;
 	
-	    function Search() {
-	        _classCallCheck(this, Search);
+	function handleDragStart(e) {
+	    this.style.opacity = '0.4';
+	    dragSrcEl = this;
 	
-	        return _possibleConstructorReturn(this, (Search.__proto__ || Object.getPrototypeOf(Search)).apply(this, arguments));
+	    e.dataTransfer.effectAllowed = 'move';
+	    e.dataTransfer.setData('text/html', this.innerHTML);
+	}
+	
+	function handleDragOver(e) {
+	    if (e.preventDefault) {
+	        e.preventDefault();
+	    }
+	    e.dataTransfer.dropEffect = 'move';
+	    this.classList.add('over');
+	    return false;
+	}
+	
+	function handleDragLeave(e) {
+	    this.classList.remove('over');
+	}
+	
+	function handleDrop(e) {
+	    if (e.stopPropagation) {
+	        e.stopPropagation();
+	    }
+	    dragSrcEl.style.opacity = '1';
+	    if (dragSrcEl != this) {
+	        var from = dragSrcEl.firstChild.firstChild.getAttribute('href');
+	        var to = this.firstChild.firstChild.getAttribute('href');
+	        var from_id = -1,
+	            to_id = -1;
+	        dragSrcEl.innerHTML = this.innerHTML;
+	
+	        chrome.storage.local.get('history', function (result) {
+	            var history = result['history'];
+	            //console.log('After get: ', history);
+	            for (var i = 0; i < history.length; ++i) {
+	                if (history[i][0] == from) {
+	                    from_id = i;
+	                }
+	                if (history[i][0] == to) {
+	                    to_id = i;
+	                }
+	            }
+	            console.log(from_id, to_id);
+	            var tmp = history[from_id];
+	            history[from_id] = history[to_id];
+	            history[to_id] = tmp;
+	            //console.log('Before set: ', history);
+	            chrome.storage.local.set({ 'history': history });
+	        });
+	        //console.log('From: ' + from + '\nTo: ' + to);
+	        this.innerHTML = e.dataTransfer.getData('text/html');
+	    }
+	    return false;
+	}
+	
+	function handleDragEnd(e) {
+	    var tabs = document.getElementsByClassName('tab');
+	    [].forEach.call(tabs, function (tab) {
+	        tab.classList.remove('over');
+	    });
+	}
+	
+	var Tab = function (_React$Component) {
+	    _inherits(Tab, _React$Component);
+	
+	    function Tab() {
+	        _classCallCheck(this, Tab);
+	
+	        return _possibleConstructorReturn(this, (Tab.__proto__ || Object.getPrototypeOf(Tab)).apply(this, arguments));
 	    }
 	
-	    _createClass(Search, [{
+	    _createClass(Tab, [{
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
-	
-	            document.getElementById('search_form').addEventListener('submit', function () {
-	                var searchText = document.getElementById('search_input').value;
-	                console.log(searchText);
-	                chrome.tabs.create({
-	                    'url': 'https://www.google.ru/search?q=' + searchText
-	                });
+	            var tabs = document.getElementsByClassName('tab');
+	            [].forEach.call(tabs, function (tab) {
+	                tab.addEventListener('dragstart', handleDragStart, false);
+	                tab.addEventListener('dragover', handleDragOver, false);
+	                tab.addEventListener('dragleave', handleDragLeave, false);
+	                tab.addEventListener('drop', handleDrop, false);
+	                tab.addEventListener('dragend', handleDragEnd, false);
 	            });
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            var href = this.props.data[0];
+	
 	            return _react2.default.createElement(
 	                'div',
-	                { className: 'search_container' },
+	                { className: 'tab', draggable: 'true' },
 	                _react2.default.createElement(
-	                    'form',
-	                    { action: '', method: 'post', id: 'search_form' },
-	                    _react2.default.createElement('input', { type: 'search', name: '', placeholder: '\u043F\u043E\u0438\u0441\u043A', id: 'search_input' }),
-	                    _react2.default.createElement('input', { type: 'submit', name: '', value: '', id: 'search_submit' })
+	                    'div',
+	                    { className: 'tab_favicon' },
+	                    _react2.default.createElement(
+	                        'a',
+	                        { href: href },
+	                        _react2.default.createElement('img', { src: 'https://www.google.com/s2/favicons?domain=' + href })
+	                    )
+	                ),
+	                _react2.default.createElement(
+	                    'div',
+	                    { className: 'tab_name' },
+	                    _react2.default.createElement(
+	                        'a',
+	                        { href: href },
+	                        _react2.default.createElement(
+	                            'h3',
+	                            null,
+	                            href
+	                        )
+	                    )
 	                )
 	            );
 	        }
 	    }]);
 	
-	    return Search;
+	    return Tab;
 	}(_react2.default.Component);
 	
-	exports.default = Search;
+	exports.default = Tab;
+	;
 
 /***/ }
 /******/ ]);

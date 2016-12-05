@@ -23,23 +23,12 @@ function buildTypedUrlList() {
         });
 }
 
-//var event = new Event('historySorted');
-
-export default class Tabs extends React.Component{
+export default class Tabs extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            history: [
-                ["google.com", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"],
-                ["vk.com", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"],
-                ["google.ru", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"],
-                ["mail.ru", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"],
-                ["google.com", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"],
-                ["openedu.ru", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"],
-                ["google.com", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"],
-                ["vk.com", "https://lh4.googleusercontent.com/-b-5aBxcxarY/UAfFW9lVyjI/AAAAAAAABUg/gQtEXuPuIds/s13/go.png"],
-            ]
+            history: []
         };
     }
 
@@ -48,40 +37,73 @@ export default class Tabs extends React.Component{
         var oneMonthAgo = (new Date).getTime() - microsecondsPerMonth;
         var urlArray = [];
         var self = this;
-        chrome.history.search({
-                'text': '',
-                'startTime': oneMonthAgo
-            },
-            function(historyItems) {
-                for (var i = 0; i < historyItems.length; ++i) {
-                    urlArray.push([historyItems[i].url, historyItems[i].visitCount]);
-                }
-                urlArray.sort(function(a, b) {
-                    return b[1] - a[1];
-                });
-                self.setState({history: urlArray.slice(0, 8)});
-                //root.dispatchEvent(event);
-            }.bind(this));
+        //chrome.storage.local.clear();
+        chrome.storage.local.get('history', function (result) {
+            if(result['history'] == undefined) {
+                chrome.history.search({
+                        'text': '',
+                        'startTime': oneMonthAgo
+                    },
+                    function (historyItems) {
+                        console.log('I am in search!');
+                        for (var i = 0; i < historyItems.length; ++i) {
+                            urlArray.push([historyItems[i].url, historyItems[i].visitCount]);
+                        }
+                        urlArray.sort(function (a, b) {
+                            return b[1] - a[1];
+                        });
+                        chrome.storage.local.set({'history': urlArray.slice(0, 8)});
+                        this.setState({history: urlArray.slice(0, 8)});
+                    }.bind(this));
+                return;
+            } else {
+                console.log('There are history in the storage');
+                this.setState({history: result['history']});
+            }
+        }.bind(this));
+    }
+
+    componentDidMount() {
+        chrome.storage.onChanged.addListener(function (changes, namespace) {
+            this.render();
+            for (let k in changes) {
+                var storageChange = changes[k];
+                console.log('Storage key "%s" in namespace "%s" changed. ' +
+                    'Old value was "%s", new value is "%s".',
+                    k,
+                    namespace,
+                    storageChange.oldValue,
+                    storageChange.newValue);
+            }
+        }.bind(this));
     }
 
     render() {
-        //root.addEventListener('historySorted', function(e) {
+        var countOfTabs = 8;
+        var data = this.state.history;
+        console.log(data);
+        if (data.length < countOfTabs) {
+            console.log('length < 8');
+            for (var i = data.length; i < countOfTabs; ++i) {
+                data[i] = [''];
+            }
+        }
+        if (data.length > countOfTabs) {
+            data = data.slice(0, countOfTabs);
+        }
+        var tabsTemplate = data.map(function(item, index) {
+           return (
+               <Tab data={item} key={index}/>
+           )
+        });
+
         return (
             <div className="tabs_container">
                 <div className="tabs">
-                    <Tab data={this.state.history[0]}/>
-                    <Tab data={this.state.history[1]}/>
-                    <Tab data={this.state.history[2]}/>
-                    <Tab data={this.state.history[3]}/>
-                    <Tab data={this.state.history[4]}/>
-                    <Tab data={this.state.history[5]}/>
-                    <Tab data={this.state.history[6]}/>
-                    <Tab data={this.state.history[7]}/>
+                    {tabsTemplate}
                 </div>
             </div>
         );
-        //}, false);
-        //заменить на tabsTemplate с data.map
     }
 };
 
