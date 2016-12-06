@@ -12,11 +12,15 @@ export default class Tabs extends React.Component {
     }
 
     componentWillMount() {
-        loadHistoryFromStorage(this);
+        loadHistoryFromStorage()
+            .then(result => {
+                this.setState({history: result});
+            });
     }
 
     render() {
         var data = this.state.history;
+        console.log('render Tabs', data);
         var tabsTemplate = data.map(function(item, index) {
            return (
                <Tab data={item} key={index} />

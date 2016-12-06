@@ -21823,12 +21823,17 @@
 	    _createClass(Tabs, [{
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
-	            (0, _storage.loadHistoryFromStorage)(this);
+	            var _this2 = this;
+	
+	            (0, _storage.loadHistoryFromStorage)().then(function (result) {
+	                _this2.setState({ history: result });
+	            });
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
 	            var data = this.state.history;
+	            console.log('render Tabs', data);
 	            var tabsTemplate = data.map(function (item, index) {
 	                return _react2.default.createElement(_Tab2.default, { data: item, key: index });
 	            });
@@ -21860,8 +21865,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	exports.default = Tab;
 	
 	var _react = __webpack_require__(2);
 	
@@ -21871,65 +21875,40 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	function Tab(props) {
+	    var href = props.data.url;
 	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var Tab = function (_React$Component) {
-	    _inherits(Tab, _React$Component);
-	
-	    function Tab() {
-	        _classCallCheck(this, Tab);
-	
-	        return _possibleConstructorReturn(this, (Tab.__proto__ || Object.getPrototypeOf(Tab)).apply(this, arguments));
-	    }
-	
-	    _createClass(Tab, [{
-	        key: 'render',
-	        value: function render() {
-	            var href = this.props.data.url;
-	
-	            return _react2.default.createElement(
-	                'div',
-	                { className: 'tab', draggable: 'true',
-	                    onDragStart: _dragAndDrop.handleDragStart,
-	                    onDragOver: _dragAndDrop.handleDragOver,
-	                    onDragLeave: _dragAndDrop.handleDragLeave,
-	                    onDrop: _dragAndDrop.handleDrop,
-	                    onDragEnd: _dragAndDrop.handleDragEnd },
+	    return _react2.default.createElement(
+	        'div',
+	        { className: 'tab', draggable: 'true', onDragStart: _dragAndDrop.handleDragStart,
+	            onDragOver: _dragAndDrop.handleDragOver,
+	            onDragLeave: _dragAndDrop.handleDragLeave,
+	            onDrop: _dragAndDrop.handleDrop,
+	            onDragEnd: _dragAndDrop.handleDragEnd },
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'tab_favicon' },
+	            _react2.default.createElement(
+	                'a',
+	                { href: href },
+	                _react2.default.createElement('img', { src: 'https://www.google.com/s2/favicons?domain=' + href })
+	            )
+	        ),
+	        _react2.default.createElement(
+	            'div',
+	            { className: 'tab_name' },
+	            _react2.default.createElement(
+	                'a',
+	                { href: href },
 	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'tab_favicon' },
-	                    _react2.default.createElement(
-	                        'a',
-	                        { href: href },
-	                        _react2.default.createElement('img', { src: 'https://www.google.com/s2/favicons?domain=' + href })
-	                    )
-	                ),
-	                _react2.default.createElement(
-	                    'div',
-	                    { className: 'tab_name' },
-	                    _react2.default.createElement(
-	                        'a',
-	                        { href: href },
-	                        _react2.default.createElement(
-	                            'h3',
-	                            null,
-	                            href
-	                        )
-	                    )
+	                    'h3',
+	                    null,
+	                    href
 	                )
-	            );
-	        }
-	    }]);
-	
-	    return Tab;
-	}(_react2.default.Component);
-	
-	exports.default = Tab;
-	;
+	            )
+	        )
+	    );
+	}
 
 /***/ },
 /* 186 */
@@ -22070,34 +22049,38 @@
 	 * Created by Дмитрий on 06.12.2016.
 	 */
 	
-	function putHistoryIntoStorage(time, self) {
-	    chrome.history.search({
-	        'text': '',
-	        'startTime': time
-	    }, function (historyItems) {
-	        console.log('I am in search!');
-	        var res = historyItems.map(function (item) {
-	            return { url: item.url, visitCount: item.visitCount };
-	        }).sort(function (a, b) {
-	            return b.visitCount - a.visitCount > 0;
-	        }).slice(0, 8);
+	function putHistoryIntoStorage(time) {
+	    console.log('putHistoryIntoStorage');
+	    return new Promise(function (resolve) {
+	        chrome.history.search({
+	            'text': '',
+	            'startTime': time
+	        }, function (historyItems) {
+	            var res = historyItems.map(function (item) {
+	                return { url: item.url, visitCount: item.visitCount };
+	            }).sort(function (a, b) {
+	                return b.visitCount - a.visitCount > 0;
+	            }).slice(0, 8);
 	
-	        chrome.storage.local.set({ 'history': res });
-	        self.setState({ history: res });
+	            chrome.storage.local.set({ 'history': res });
+	            resolve(res);
+	        });
 	    });
 	}
 	
-	function loadHistoryFromStorage(self) {
+	function loadHistoryFromStorage() {
 	    var microsecondsPerMonth = 1000 * 60 * 60 * 24 * 30;
 	    var oneMonthAgo = new Date().getTime() - microsecondsPerMonth;
-	    //chrome.storage.local.clear();
-	    chrome.storage.local.get('history', function (result) {
-	        if (result['history'] == undefined) {
-	            putHistoryIntoStorage(oneMonthAgo, self);
-	        } else {
-	            //console.log('There are history in the storage');
-	            self.setState({ history: result['history'] });
-	        }
+	    return new Promise(function (resolve) {
+	        chrome.storage.local.get('history', function (result) {
+	            if (result['history'] == undefined) {
+	                putHistoryIntoStorage(oneMonthAgo).then(function (res) {
+	                    resolve(res);
+	                });
+	            } else {
+	                resolve(result['history']);
+	            }
+	        });
 	    });
 	}
 	
@@ -22114,7 +22097,6 @@
 	                to_id = i;
 	            }
 	        }
-	        //console.log(from_id, to_id);
 	        var tmp = history[from_id];
 	        history[from_id] = history[to_id];
 	        history[to_id] = tmp;
