@@ -67,3 +67,7 @@ img {
 .tab.over {
     background: #dcdcdc;
 }
+
+.dragStart {
+    opacity: 0.4;
+}

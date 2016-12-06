@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Tabs from './components/historyTabs';
-import Links from './components/links';
-import Search from './components/search';
+import Tabs from './components/Tabs';
+import Links from './components/Links';
+import Search from './components/Search';
 
 const elem =
     <div className="container">

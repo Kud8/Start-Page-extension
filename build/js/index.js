@@ -61,26 +61,26 @@
 	
 	var _reactDom2 = _interopRequireDefault(_reactDom);
 	
-	var _historyTabs = __webpack_require__(184);
+	var _Tabs = __webpack_require__(184);
 	
-	var _historyTabs2 = _interopRequireDefault(_historyTabs);
+	var _Tabs2 = _interopRequireDefault(_Tabs);
 	
-	var _links = __webpack_require__(186);
+	var _Links = __webpack_require__(186);
 	
-	var _links2 = _interopRequireDefault(_links);
+	var _Links2 = _interopRequireDefault(_Links);
 	
-	var _search = __webpack_require__(187);
+	var _Search = __webpack_require__(187);
 	
-	var _search2 = _interopRequireDefault(_search);
+	var _Search2 = _interopRequireDefault(_Search);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var elem = _react2.default.createElement(
 	    'div',
 	    { className: 'container' },
-	    _react2.default.createElement(_search2.default, null),
-	    _react2.default.createElement(_historyTabs2.default, null),
-	    _react2.default.createElement(_links2.default, null)
+	    _react2.default.createElement(_Search2.default, null),
+	    _react2.default.createElement(_Tabs2.default, null),
+	    _react2.default.createElement(_Links2.default, null)
 	);
 	
 	_reactDom2.default.render(elem, document.getElementById('root'));
@@ -21796,6 +21796,8 @@
 	
 	var _Tab2 = _interopRequireDefault(_Tab);
 	
+	var _storage = __webpack_require__(188);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -21803,25 +21805,6 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	function buildTypedUrlList() {
-	    var microsecondsPerMonth = 1000 * 60 * 60 * 24 * 30;
-	    var oneMonthAgo = new Date().getTime() - microsecondsPerMonth;
-	
-	    var urlArray = [];
-	    chrome.history.search({
-	        'text': '',
-	        'startTime': oneMonthAgo
-	    }, function (historyItems) {
-	        for (var i = 0; i < historyItems.length; ++i) {
-	            urlArray.push({ url: historyItems[i].url, visitCount: historyItems[i].visitCount });
-	        }
-	        urlArray.sort(function (a, b) {
-	            return b.visitCount - a.visitCount;
-	        });
-	        console.log(urlArray.slice(0, 8));
-	    });
-	}
 	
 	var Tabs = function (_React$Component) {
 	    _inherits(Tabs, _React$Component);
@@ -21840,60 +21823,12 @@
 	    _createClass(Tabs, [{
 	        key: 'componentWillMount',
 	        value: function componentWillMount() {
-	            var microsecondsPerMonth = 1000 * 60 * 60 * 24 * 30;
-	            var oneMonthAgo = new Date().getTime() - microsecondsPerMonth;
-	            var urlArray = [];
-	            var self = this;
-	            //chrome.storage.local.clear();
-	            chrome.storage.local.get('history', function (result) {
-	                if (result['history'] == undefined) {
-	                    chrome.history.search({
-	                        'text': '',
-	                        'startTime': oneMonthAgo
-	                    }, function (historyItems) {
-	                        console.log('I am in search!');
-	                        for (var i = 0; i < historyItems.length; ++i) {
-	                            urlArray.push({ url: historyItems[i].url, visitCount: historyItems[i].visitCount });
-	                        }
-	                        urlArray.sort(function (a, b) {
-	                            return b.visitCount - a.visitCount;
-	                        });
-	                        chrome.storage.local.set({ 'history': urlArray.slice(0, 8) });
-	                        this.setState({ history: urlArray.slice(0, 8) });
-	                    }.bind(this));
-	                    return;
-	                } else {
-	                    console.log('There are history in the storage');
-	                    this.setState({ history: result['history'] });
-	                }
-	            }.bind(this));
-	        }
-	    }, {
-	        key: 'componentDidMount',
-	        value: function componentDidMount() {
-	            chrome.storage.onChanged.addListener(function (changes, namespace) {
-	                this.render();
-	                for (var k in changes) {
-	                    var storageChange = changes[k];
-	                    console.log('Storage key "%s" in namespace "%s" changed. ' + 'Old value was "%s", new value is "%s".', k, namespace, storageChange.oldValue, storageChange.newValue);
-	                }
-	            }.bind(this));
+	            (0, _storage.loadHistoryFromStorage)(this);
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            var countOfTabs = 8;
 	            var data = this.state.history;
-	            console.log(data);
-	            if (data.length < countOfTabs) {
-	                console.log('length < 8');
-	                for (var i = data.length; i < countOfTabs; ++i) {
-	                    data[i] = { url: '' };
-	                }
-	            }
-	            if (data.length > countOfTabs) {
-	                data = data.slice(0, countOfTabs);
-	            }
 	            var tabsTemplate = data.map(function (item, index) {
 	                return _react2.default.createElement(_Tab2.default, { data: item, key: index });
 	            });
@@ -21932,6 +21867,8 @@
 	
 	var _react2 = _interopRequireDefault(_react);
 	
+	var _dragAndDrop = __webpack_require__(189);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -21939,8 +21876,6 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 	
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-	
-	var dragSrcEl = null;
 	
 	var Tab = function (_React$Component) {
 	    _inherits(Tab, _React$Component);
@@ -21952,72 +21887,6 @@
 	    }
 	
 	    _createClass(Tab, [{
-	        key: 'handleDragStart',
-	        value: function handleDragStart(e) {
-	            var self = e.currentTarget;
-	            self.style.opacity = '0.4';
-	            dragSrcEl = self;
-	
-	            e.dataTransfer.effectAllowed = 'move';
-	            e.dataTransfer.setData('text/html', self.innerHTML);
-	        }
-	    }, {
-	        key: 'handleDragOver',
-	        value: function handleDragOver(e) {
-	            e.preventDefault();
-	            e.dataTransfer.dropEffect = 'move';
-	            var self = e.currentTarget;
-	            self.classList.add('over');
-	            return false;
-	        }
-	    }, {
-	        key: 'handleDragLeave',
-	        value: function handleDragLeave(e) {
-	            var self = e.currentTarget;
-	            self.classList.remove('over');
-	        }
-	    }, {
-	        key: 'handleDrop',
-	        value: function handleDrop(e) {
-	            e.stopPropagation();
-	            var self = e.currentTarget;
-	            dragSrcEl.style.opacity = '1';
-	            if (dragSrcEl != self) {
-	                var from = dragSrcEl.firstChild.firstChild.getAttribute('href');
-	                var to = self.firstChild.firstChild.getAttribute('href');
-	                var from_id = -1,
-	                    to_id = -1;
-	                dragSrcEl.innerHTML = self.innerHTML;
-	
-	                chrome.storage.local.get('history', function (result) {
-	                    var history = result['history'];
-	                    for (var i = 0; i < history.length; ++i) {
-	                        if (history[i].url == from) {
-	                            from_id = i;
-	                        }
-	                        if (history[i].url == to) {
-	                            to_id = i;
-	                        }
-	                    }
-	                    console.log(from_id, to_id);
-	                    var tmp = history[from_id];
-	                    history[from_id] = history[to_id];
-	                    history[to_id] = tmp;
-	                    chrome.storage.local.set({ 'history': history });
-	                });
-	                self.innerHTML = e.dataTransfer.getData('text/html');
-	            }
-	            return false;
-	        }
-	    }, {
-	        key: 'handleDragEnd',
-	        value: function handleDragEnd(e) {
-	            var tabs = document.getElementsByClassName('tab');
-	            [].forEach.call(tabs, function (tab) {
-	                tab.classList.remove('over');
-	            });
-	        }
-	    }, {
 	        key: 'render',
 	        value: function render() {
 	            var href = this.props.data.url;
@@ -22025,11 +21894,11 @@
 	            return _react2.default.createElement(
 	                'div',
 	                { className: 'tab', draggable: 'true',
-	                    onDragStart: this.handleDragStart,
-	                    onDragOver: this.handleDragOver,
-	                    onDragLeave: this.handleDragLeave,
-	                    onDrop: this.handleDrop,
-	                    onDragEnd: this.handleDragEnd },
+	                    onDragStart: _dragAndDrop.handleDragStart,
+	                    onDragOver: _dragAndDrop.handleDragOver,
+	                    onDragLeave: _dragAndDrop.handleDragLeave,
+	                    onDrop: _dragAndDrop.handleDrop,
+	                    onDragEnd: _dragAndDrop.handleDragEnd },
 	                _react2.default.createElement(
 	                    'div',
 	                    { className: 'tab_favicon' },
@@ -22184,6 +22053,148 @@
 	            _react2.default.createElement("input", { type: "submit", name: "", value: "", id: "search_submit" })
 	        )
 	    );
+	}
+
+/***/ },
+/* 188 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.loadHistoryFromStorage = loadHistoryFromStorage;
+	exports.replaceHrefsIntoStorage = replaceHrefsIntoStorage;
+	/**
+	 * Created by Дмитрий on 06.12.2016.
+	 */
+	
+	function putHistoryIntoStorage(time, self) {
+	    chrome.history.search({
+	        'text': '',
+	        'startTime': time
+	    }, function (historyItems) {
+	        console.log('I am in search!');
+	        var res = historyItems.map(function (item) {
+	            return { url: item.url, visitCount: item.visitCount };
+	        }).sort(function (a, b) {
+	            return b.visitCount - a.visitCount > 0;
+	        }).slice(0, 8);
+	
+	        chrome.storage.local.set({ 'history': res });
+	        self.setState({ history: res });
+	    });
+	}
+	
+	function loadHistoryFromStorage(self) {
+	    var microsecondsPerMonth = 1000 * 60 * 60 * 24 * 30;
+	    var oneMonthAgo = new Date().getTime() - microsecondsPerMonth;
+	    //chrome.storage.local.clear();
+	    chrome.storage.local.get('history', function (result) {
+	        if (result['history'] == undefined) {
+	            putHistoryIntoStorage(oneMonthAgo, self);
+	        } else {
+	            //console.log('There are history in the storage');
+	            self.setState({ history: result['history'] });
+	        }
+	    });
+	}
+	
+	function replaceHrefsIntoStorage(firstElement, SecondElement) {
+	    var from_id = -1,
+	        to_id = -1;
+	    chrome.storage.local.get('history', function (result) {
+	        var history = result['history'];
+	        for (var i = 0; i < history.length; ++i) {
+	            if (history[i].url == firstElement) {
+	                from_id = i;
+	            }
+	            if (history[i].url == SecondElement) {
+	                to_id = i;
+	            }
+	        }
+	        //console.log(from_id, to_id);
+	        var tmp = history[from_id];
+	        history[from_id] = history[to_id];
+	        history[to_id] = tmp;
+	        chrome.storage.local.set({ 'history': history });
+	    });
+	}
+
+/***/ },
+/* 189 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.handleDrop = handleDrop;
+	exports.handleDragStart = handleDragStart;
+	exports.handleDragOver = handleDragOver;
+	exports.handleDragLeave = handleDragLeave;
+	exports.handleDragEnd = handleDragEnd;
+	
+	var _storage = __webpack_require__(188);
+	
+	var dragSrcEl = null; /**
+	                       * Created by Дмитрий on 06.12.2016.
+	                       */
+	
+	function replaceTabs(firstElement, secondElement) {
+	    var from = firstElement.firstChild.firstChild.getAttribute('href');
+	    var to = secondElement.firstChild.firstChild.getAttribute('href');
+	
+	    var tmpHtml = firstElement.innerHTML;
+	    firstElement.innerHTML = secondElement.innerHTML;
+	    secondElement.innerHTML = tmpHtml;
+	
+	    (0, _storage.replaceHrefsIntoStorage)(from, to);
+	}
+	
+	function handleDrop(e) {
+	    e.stopPropagation();
+	    console.log(e.target);
+	    console.log(dragSrcEl);
+	    console.log(e.currentTarget);
+	    dragSrcEl.classList.remove('dragStart');
+	
+	    var self = e.currentTarget;
+	    if (dragSrcEl != self) {
+	        replaceTabs(dragSrcEl, self);
+	    }
+	    self.classList.remove('over');
+	
+	    return false;
+	}
+	
+	function handleDragStart(e) {
+	    var self = e.currentTarget;
+	    self.classList.add('dragStart');
+	    dragSrcEl = self;
+	
+	    e.dataTransfer.effectAllowed = 'move';
+	}
+	
+	function handleDragOver(e) {
+	    e.preventDefault();
+	    e.dataTransfer.dropEffect = 'move';
+	
+	    var self = e.currentTarget;
+	    self.classList.add('over');
+	
+	    return false;
+	}
+	
+	function handleDragLeave(e) {
+	    var self = e.currentTarget;
+	    self.classList.remove('over');
+	}
+	
+	function handleDragEnd(e) {
+	    e.currentTarget.classList.remove('dragStart');
 	}
 
 /***/ }
